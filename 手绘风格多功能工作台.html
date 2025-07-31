@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>手绘工作台</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Gochi+Hand&family=Comic+Neue:wght@400;700&display=swap');
+        
+        :root {
+            --primary: #FF6B6B;
+            --secondary: #4ECDC4;
+            --bg: #FFF5F5;
+            --card: #FFFFFF;
+            --text: #333333;
+            --accent: #FFD166;
+            --border: rgba(0, 0, 0, 0.1);
+            --shadow: 5px 5px 0 rgba(0, 0, 0, 0.1);
+            --radius: 16px;
+            --sketch: 2px;
+        }
+
+        .theme-mint {
+            --primary: #06D6A0;
+            --secondary: #118AB2;
+            --bg: #F7FFF7;
+            --card: #FFFFFF;
+            --text: #1A535C;
+            --accent: #FFD166;
+        }
+
+        .theme-pink {
+            --primary: #FF7096;
+            --secondary: #FF8E72;
+            --bg: #FFF0F5;
+            --card: #FFFFFF;
+            --text: #6D6875;
+            --accent: #FFB4A2;
+        }
+
+        .theme-yellow {
+            --primary: #FFD166;
+            --secondary: #EF476F;
+            --bg: #FFF9E6;
+            --card: #FFFFFF;
+            --text: #26547C;
+            --accent: #06D6A0;
+        }
+
+        .theme-blue {
+            --primary: #118AB2;
+            --secondary: #073B4C;
+            --bg: #E6F7FF;
+            --card: #FFFFFF;
+            --text: #073B4C;
+            --accent: #EF476F;
+        }
+
+        .theme-purple {
+            --primary: #9B5DE5;
+            --secondary: #F15BB5;
+            --bg: #F7F0FF;
+            --card: #FFFFFF;
+            --text: #4B2E83;
+            --accent: #FEE440;
+        }
+
+        .theme-orange {
+            --primary: #F77F00;
+            --secondary: #D62828;
+            --bg: #FFF0E6;
+            --card: #FFFFFF;
+            --text: #003049;
+            --accent: #FCBF49;
+        }
+
+        .theme-dark {
+            --primary: #8338EC;
+            --secondary: #3A86FF;
+            --bg: #1A1A2E;
+            --card: #16213E;
+            --text: #E6E6E6;
+            --accent: #FFD166;
+        }
+
+        body {
+            font-family: 'Comic Neue', cursive;
+            background: var(--bg);
+            color: var(--text);
+            padding: 24px;
+            min-height: 100vh;
+            transition: all 0.3s ease;
+            background-image: radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.2) 0%, transparent 20%);
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            border: var(--sketch) solid var(--primary);
+            position: relative;
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h100v100H0z' fill='none'/%3E%3Cpath d='M20 20h60v60H20z' stroke='%23FF6B6B' stroke-width='1' stroke-dasharray='5,5' fill='none' opacity='0.2'/%3E%3C/svg%3E");
+        }
+
+        .card::before {
+            content: "";
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            right: -5px;
+            bottom: -5px;
+            border: var(--sketch) dashed var(--primary);
+            border-radius: calc(var(--radius) + 5px);
+            pointer-events: none;
+            opacity: 0.3;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: var(--sketch) dashed var(--primary);
+        }
+
+        .card-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0;
+            color: var(--primary);
+            font-family: 'Gochi Hand', cursive;
+            text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            font-family: 'Gochi Hand', cursive;
+            box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.1);
+            border: var(--sketch) solid var(--text);
+        }
+
+        .btn:hover {
+            background: var(--secondary);
+            transform: translateY(-2px) rotate(-2deg);
+            box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        /* 时钟样式 */
+        .clock {
+            text-align: center;
+            margin: 16px 0;
+        }
+
+        .time {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            font-family: 'Gochi Hand', cursive;
+            margin-bottom: 8px;
+            text-shadow: 3px 3px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        .date {
+            font-size: 1.5rem;
+            opacity: 0.8;
+            margin-bottom: 24px;
+            font-family: 'Gochi Hand', cursive;
+        }
+
+        .countdown {
+            font-size: 2.5rem;
+            color: var(--secondary);
+            font-family: 'Gochi Hand', cursive;
+            margin: 16px 0;
+            text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        .countdown-label {
+            text-align: center;
+            font-size: 1.2rem;
+            opacity: 0.7;
+            font-family: 'Gochi Hand', cursive;
+        }
+
+        /* 待办事项样式 */
+        .tabs {
+            display: flex;
+            margin-bottom: 16px;
+            border-bottom: var(--sketch) dashed var(--primary);
+        }
+
+        .tab {
+            padding: 8px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            color: var(--text);
+            opacity: 0.7;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            font-family: 'Gochi Hand', cursive;
+        }
+
+        .tab:hover {
+            opacity: 1;
+            transform: rotate(-2deg);
+        }
+
+        .tab.active {
+            border-bottom: 3px solid var(--primary);
+            color: var(--primary);
+            opacity: 1;
+        }
+
+        .todo-list {
+            list-style: none;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 16px;
+        }
+
+        .todo-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: var(--sketch) dotted var(--border);
+        }
+
+        .todo-content {
+            flex-grow: 1;
+            margin-right: 12px;
+        }
+
+        .todo-text {
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        .todo-time {
+            font-size: 0.85rem;
+            color: var(--text);
+            opacity: 0.7;
+        }
+
+        .todo-delete {
+            background: none;
+            border: none;
+            color: var(--danger);
+            cursor: pointer;
+            font-size: 16px;
+            opacity: 0.7;
+            transition: all 0.3s ease;
+        }
+
+        .todo-delete:hover {
+            opacity: 1;
+            transform: scale(1.2) rotate(10deg);
+        }
+
+        .todo-form {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .todo-input {
+            flex-grow: 1;
+            padding: 12px;
+            border: var(--sketch) solid var(--primary);
+            border-radius: 50px;
+            font-size: 16px;
+            background: var(--card);
+            color: var(--text);
+            font-family: 'Comic Neue', cursive;
+            box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.05);
+        }
+
+        .todo-time-input {
+            width: 100px;
+            padding: 12px;
+            border: var(--sketch) solid var(--primary);
+            border-radius: 50px;
+            font-size: 16px;
+            background: var(--card);
+            color: var(--text);
+            font-family: 'Comic Neue', cursive;
+            box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.05);
+        }
+
+        /* 电子宠物样式 */
+        .pet-container {
+            text-align: center;
+        }
+
+        .pet {
+            font-size: 5rem;
+            margin: 24px 0;
+            cursor: pointer;
+            transition: transform 0.2s;
+            display: inline-block;
+            filter: drop-shadow(3px 3px 0 rgba(0, 0, 0, 0.1));
+        }
+
+        .pet:hover {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .pet-name {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 1.5rem;
+            margin-bottom: 4px;
+            font-family: 'Gochi Hand', cursive;
+        }
+
+        .pet-status {
+            font-size: 1rem;
+            opacity: 0.7;
+            margin-bottom: 16px;
+            font-family: 'Gochi Hand', cursive;
+        }
+
+        .pet-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        /* 主题选择样式 */
+        .themes {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .theme {
+            height: 80px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            border: var(--sketch) solid var(--text);
+            font-family: 'Gochi Hand', cursive;
+            box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        .theme:hover {
+            transform: scale(1.05) rotate(-2deg);
+            box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        .theme.active {
+            border: 3px solid var(--text);
+            box-shadow: 0 0 0 3px var(--primary);
+        }
+
+        /* 通知样式 */
+        .notification {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--primary);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 50px;
+            box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.2);
+            transform: translateX(120%);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            max-width: 300px;
+            font-weight: 700;
+            font-family: 'Gochi Hand', cursive;
+            border: var(--sketch) solid var(--text);
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        /* 花瓣效果 */
+        .petals {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 999;
+            display: none;
+        }
+
+        .petal {
+            position: absolute;
+            font-size: 24px;
+            opacity: 0.7;
+            animation: falling linear infinite;
+            filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.1));
+        }
+
+        @keyframes falling {
+            0% {
+                transform: translateY(-10%) rotate(0deg);
+            }
+            100% {
+                transform: translateY(110vh) rotate(360deg);
+            }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            
+            .time {
+                font-size: 2.5rem;
+            }
+            
+            .countdown {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Gochi+Hand&family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body class="theme-default">
+    <div class="container">
+        <!-- 时钟卡片 -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">工作时间</h2>
+                <button class="btn" id="clock-settings-btn">设置</button>
+            </div>
+            <div class="clock">
+                <div class="time" id="current-time">00:00:00</div>
+                <div class="date" id="current-date">2023年1月1日 星期一</div>
+                <div class="countdown" id="countdown">--:--:--</div>
+                <div class="countdown-label">距离下班还有</div>
+            </div>
+            
+            <div class="settings-panel" id="clock-settings">
+                <div class="form-group">
+                    <label for="off-time">下班时间</label>
+                    <input type="time" id="off-time" value="18:00">
+                </div>
+                <button class="btn" id="save-off-time">保存设置</button>
+            </div>
+        </div>
+        
+        <!-- 待办事项卡片 -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">待办事项</h2>
+            </div>
+            
+            <div class="tabs">
+                <div class="tab active" id="today-tab">今日</div>
+                <div class="tab" id="tomorrow-tab">明日</div>
+            </div>
+            
+            <ul class="todo-list" id="today-todos"></ul>
+            <ul class="todo-list" id="tomorrow-todos" style="display: none;"></ul>
+            
+            <div class="todo-form">
+                <input type="text" class="todo-input" id="todo-input" placeholder="添加新任务...">
+                <input type="time" class="todo-time-input" id="todo-time">
+                <button class="btn" id="add-todo">添加</button>
+            </div>
+        </div>
+        
+        <!-- 电子宠物卡片 -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">工作伙伴</h2>
+                <button class="btn" id="pet-settings-btn">设置</button>
+            </div>
+            <div class="pet-container">
+                <div class="pet" id="pet">🐶</div>
+                <div class="pet-info">
+                    <div class="pet-name" id="pet-name">旺财</div>
+                    <div class="pet-status" id="pet-status">开心</div>
+                </div>
+                <div class="pet-actions">
+                    <button class="btn" id="feed-btn">喂食</button>
+                    <button class="btn" id="play-btn">玩耍</button>
+                </div>
+            </div>
+            
+            <div class="settings-panel" id="pet-settings">
+                <div class="form-group">
+                    <label for="pet-type">宠物类型</label>
+                    <select id="pet-type" class="todo-input">
+                        <option value="dog">狗狗 🐶</option>
+                        <option value="cat">猫猫 🐱</option>
+                        <option value="apple">苹果 🍎</option>
+                        <option value="pear">雪梨 🍐</option>
+                        <option value="peach">毛桃 🍑</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="pet-name-input">宠物名字</label>
+                    <input type="text" id="pet-name-input" class="todo-input" value="旺财">
+                </div>
+                <button class="btn" id="save-pet-settings">保存设置</button>
+            </div>
+        </div>
+        
+        <!-- 主题卡片 -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">主题颜色</h2>
+            </div>
+            <div class="themes">
+                <div class="theme" style="background: linear-gradient(135deg, #FF6B6B, #FF8E72);" data-theme="default">默认</div>
+                <div class="theme" style="background: linear-gradient(135deg, #06D6A0, #118AB2);" data-theme="mint">薄荷</div>
+                <div class="theme" style="background: linear-gradient(135deg, #FF7096, #FF8E72);" data-theme="pink">粉红</div>
+                <div class="theme" style="background: linear-gradient(135deg, #FFD166, #EF476F);" data-theme="yellow">阳光</div>
+                <div class="theme" style="background: linear-gradient(135deg, #118AB2, #073B4C);" data-theme="blue">海洋</div>
+                <div class="theme" style="background: linear-gradient(135deg, #9B5DE5, #F15BB5);" data-theme="purple">紫罗兰</div>
+                <div class="theme" style="background: linear-gradient(135deg, #F77F00, #D62828);" data-theme="orange">橙子</div>
+                <div class="theme" style="background: linear-gradient(135deg, #8338EC, #3A86FF);" data-theme="dark">暗黑</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 通知 -->
+    <div class="notification" id="notification"></div>
+    
+    <!-- 花瓣效果 -->
+    <div class="petals" id="petals"></div>
+    
+    <script>
+        // 时钟功能
+        function updateClock() {
+            const now = new Date();
+            const timeElement = document.getElementById('current-time');
+            const dateElement = document.getElementById('current-date');
+            
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            timeElement.textContent = `${hours}:${minutes}:${seconds}`;
+            
+            const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+            const year = now.getFullYear();
+            const month = now.getMonth() + 1;
+            const day = now.getDate();
+            const weekday = weekdays[now.getDay()];
+            dateElement.textContent = `${year}年${month}月${day}日 ${weekday}`;
+            
+            updateCountdown();
+            checkTodoReminders();
+        }
+        
+        // 下班倒计时
+        function updateCountdown() {
+            const now = new Date();
+            const offTime = localStorage.getItem('offTime') || '18:00';
+            const [offHour, offMinute] = offTime.split(':').map(Number);
+            
+            const offTimeToday = new Date(
+                now.getFullYear(),
+                now.getMonth(),
+                now.getDate(),
+                offHour,
+                offMinute,
+                0
+            );
+            
+            if (now >= offTimeToday) {
+                document.getElementById('countdown').textContent = "下班啦！";
+                document.querySelector('.countdown-label').textContent = "享受你的休息时间";
+                
+                if (!localStorage.getItem('petalsShownToday')) {
+                    showPetals();
+                    localStorage.setItem('petalsShownToday', 'true');
+                    
+                    const midnight = new Date(
+                        now.getFullYear(),
+                        now.getMonth(),
+                        now.getDate() + 1,
+                        0, 0, 0
+                    );
+                    const timeUntilMidnight = midnight - now;
+                    
+                    setTimeout(() => {
+                        localStorage.removeItem('petalsShownToday');
+                    }, timeUntilMidnight);
+                }
+                return;
+            }
+            
+            const diff = offTimeToday - now;
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+            
+            document.getElementById('countdown').textContent = 
+                `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+        
+        // 花瓣彩蛋
+        function showPetals() {
+            const petalsContainer = document.getElementById('petals');
+            petalsContainer.style.display = 'block';
+            
+            for (let i = 0; i < 50; i++) {
+                const petal = document.createElement('div');
+                petal.className = 'petal';
+                
+                const colors = ['🌸', '🌺', '🌼', '🌹', '🌻', '🌷'];
+                const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                
+                petal.textContent = randomColor;
+                petal.style.left = `${Math.random() * 100}%`;
+                petal.style.fontSize = `${Math.random() * 20 + 10}px`;
+                petal.style.animationDuration = `${Math.random() * 5 + 5}s`;
+                petal.style.animationDelay = `${Math.random() * 5}s`;
+                
+                petalsContainer.appendChild(petal);
+            }
+            
+            setTimeout(() => {
+                petalsContainer.style.display = 'none';
+                while (petalsContainer.firstChild) {
+                    petalsContainer.removeChild(petalsContainer.firstChild);
+                }
+            }, 5000);
+        }
+        
+        // 待办事项功能
+        function loadTodos() {
+            const todayTodos = JSON.parse(localStorage.getItem('todayTodos')) || [];
+            const tomorrowTodos = JSON.parse(localStorage.getItem('tomorrowTodos')) || [];
+            
+            const todayList = document.getElementById('today-todos');
+            const tomorrowList = document.getElementById('tomorrow-todos');
+            
+            todayList.innerHTML = '';
+            tomorrowList.innerHTML = '';
+            
+            todayTodos.forEach((todo, index) => {
+                const li = document.createElement('li');
+                li.className = 'todo-item';
+                li.innerHTML = `
+                    <div class="todo-content">
+                        <div class="todo-text">${todo.text}</div>
+                        <div class="todo-time">${todo.time}</div>
+                    </div>
+                    <button class="todo-delete" data-index="${index}" data-type="today">❌</button>
+                `;
+                todayList.appendChild(li);
+            });
+            
+            tomorrowTodos.forEach((todo, index) => {
+                const li = document.createElement('li');
+                li.className = 'todo-item';
+                li.innerHTML = `
+                    <div class="todo-content">
+                        <div class="todo-text">${todo.text}</div>
+                        <div class="todo-time">${todo.time}</div>
+                    </div>
+                    <button class="todo-delete" data-index="${index}" data-type="tomorrow">❌</button>
+                `;
+                tomorrowList.appendChild(li);
+            });
+            
+            document.querySelectorAll('.todo-delete').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    const type = this.getAttribute('data-type');
+                    deleteTodo(index, type);
+                });
+            });
+        }
+        
+        function addTodo(text, time, type) {
+            const todos = JSON.parse(localStorage.getItem(`${type}Todos`)) || [];
+            todos.push({ text, time });
+            localStorage.setItem(`${type}Todos`, JSON.stringify(todos));
+            loadTodos();
+        }
+        
+        function deleteTodo(index, type) {
+            const todos = JSON.parse(localStorage.getItem(`${type}Todos`)) || [];
+            todos.splice(index, 1);
+            localStorage.setItem(`${type}Todos`, JSON.stringify(todos));
+            loadTodos();
+        }
+        
+        function checkTodoReminders() {
+            const now = new Date();
+            const currentHours = String(now.getHours()).padStart(2, '0');
+            const currentMinutes = String(now.getMinutes()).padStart(2, '0');
+            const currentTime = `${currentHours}:${currentMinutes}`;
+            
+            const todayTodos = JSON.parse(localStorage.getItem('todayTodos')) || [];
+            const tomorrowTodos = JSON.parse(localStorage.getItem('tomorrowTodos')) || [];
+            
+            [...todayTodos, ...tomorrowTodos].forEach(todo => {
+                if (todo.time === currentTime && !todo.notified) {
+                    showNotification(`提醒: ${todo.text}`);
+                    todo.notified = true;
+                    localStorage.setItem(todo.time.startsWith('23') ? 'tomorrowTodos' : 'todayTodos', 
+                        JSON.stringify(todo.time.startsWith('23') ? tomorrowTodos : todayTodos));
+                }
+            });
+        }
+        
+        // 通知功能
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 5000);
+        }
+        
+        // 电子宠物功能
+        function loadPet() {
+            const petType = localStorage.getItem('petType') || 'dog';
+            const petName = localStorage.getItem('petName') || '旺财';
+            
+            const petEmojis = {
+                dog: '🐶',
+                cat: '🐱',
+                apple: '🍎',
+                pear: '🍐',
+                peach: '🍑'
+            };
+            
+            document.getElementById('pet').textContent = petEmojis[petType];
+            document.getElementById('pet-name').textContent = petName;
+            document.getElementById('pet-name-input').value = petName;
+            document.getElementById('pet-type').value = petType;
+            
+            const statuses = ['开心', '饿了', '困了', '无聊', '兴奋'];
+            document.getElementById('pet-status').textContent = statuses[Math.floor(Math.random() * statuses.length)];
+        }
+        
+        // 主题切换功能
+        function setTheme(theme) {
+            document.body.className = `theme-${theme}`;
+            localStorage.setItem('theme', theme);
+            
+            document.querySelectorAll('.theme').forEach(option => {
+                option.classList.remove('active');
+                if (option.getAttribute('data-theme') === theme) {
+                    option.classList.add('active');
+                }
+            });
+        }
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            updateClock();
+            setInterval(updateClock, 1000);
+            
+            const savedOffTime = localStorage.getItem('offTime');
+            if (savedOffTime) {
+                document.getElementById('off-time').value = savedOffTime;
+            }
+            
+            // 时钟设置
+            document.getElementById('clock-settings-btn').addEventListener('click', function() {
+                document.getElementById('clock-settings').classList.toggle('show');
+            });
+            
+            document.getElementById('save-off-time').addEventListener('click', function() {
+                const offTime = document.getElementById('off-time').value;
+                localStorage.setItem('offTime', offTime);
+                document.getElementById('clock-settings').classList.remove('show');
+                updateCountdown();
+                showNotification('下班时间已更新');
+            });
+            
+            // 待办事项
+            loadTodos();
+            
+            document.getElementById('today-tab').addEventListener('click', function() {
+                this.classList.add('active');
+                document.getElementById('tomorrow-tab').classList.remove('active');
+                document.getElementById('today-todos').style.display = 'block';
+                document.getElementById('tomorrow-todos').style.display = 'none';
+            });
+            
+            document.getElementById('tomorrow-tab').addEventListener('click', function() {
+                this.classList.add('active');
+                document.getElementById('today-tab').classList.remove('active');
+                document.getElementById('today-todos').style.display = 'none';
+                document.getElementById('tomorrow-todos').style.display = 'block';
+            });
+            
+            document.getElementById('add-todo').addEventListener('click', function() {
+                const input = document.getElementById('todo-input');
+                const timeInput = document.getElementById('todo-time');
+                const activeTab = document.querySelector('.tab.active').id;
+                
+                if (input.value.trim() === '') {
+                    showNotification('请输入待办事项内容');
+                    return;
+                }
+                
+                if (timeInput.value === '') {
+                    showNotification('请设置提醒时间');
+                    return;
+                }
+                
+                const type = activeTab === 'today-tab' ? 'today' : 'tomorrow';
+                addTodo(input.value.trim(), timeInput.value, type);
+                input.value = '';
+                timeInput.value = '';
+            });
+            
+            document.getElementById('todo-input').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    document.getElementById('add-todo').click();
+                }
+            });
+            
+            // 电子宠物
+            loadPet();
+            
+            document.getElementById('pet-settings-btn').addEventListener('click', function() {
+                document.getElementById('pet-settings').classList.toggle('show');
+            });
+            
+            document.getElementById('save-pet-settings').addEventListener('click', function() {
+                const petType = document.getElementById('pet-type').value;
+                const petName = document.getElementById('pet-name-input').value.trim() || '旺财';
+                
+                localStorage.setItem('petType', petType);
+                localStorage.setItem('petName', petName);
+                
+                loadPet();
+                document.getElementById('pet-settings').classList.remove('show');
+                showNotification('宠物设置已保存');
+            });
+            
+            document.getElementById('feed-btn').addEventListener('click', function() {
+                const statuses = ['吃饱了', '满足', '开心', '谢谢', '还想吃'];
+                document.getElementById('pet-status').textContent = statuses[Math.floor(Math.random() * statuses.length)];
+                showNotification('你喂了宠物食物');
+            });
+            
+            document.getElementById('play-btn').addEventListener('click', function() {
+                const statuses = ['玩得好开心', '兴奋', '快乐', '再来一次', '喜欢和你玩'];
+                document.getElementById('pet-status').textContent = statuses[Math.floor(Math.random() * statuses.length)];
+                showNotification('你和宠物一起玩耍');
+            });
+            
+            document.getElementById('pet').addEventListener('click', function() {
+                const reactions = ['开心', '惊喜', '喜欢你', '好高兴', '摇尾巴'];
+                document.getElementById('pet-status').textContent = reactions[Math.floor(Math.random() * reactions.length)];
+            });
+            
+            // 主题
+            const savedTheme = localStorage.getItem('theme') || 'default';
+            setTheme(savedTheme);
+            
+            document.querySelectorAll('.theme').forEach(option => {
+                option.addEventListener('click', function() {
+                    const theme = this.getAttribute('data-theme');
+                    setTheme(theme);
+                    showNotification(`已切换至${this.textContent}主题`);
+                });
+                
+                if (option.getAttribute('data-theme') === savedTheme) {
+                    option.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
